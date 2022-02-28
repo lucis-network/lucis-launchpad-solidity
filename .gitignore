@@ -7,3 +7,6 @@ typechain
 #Hardhat files
 cache
 artifacts
+.env.local
+.env.mainet
+.env.testnet
