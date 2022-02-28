@@ -10,3 +10,4 @@ artifacts
 .env.local
 .env.mainet
 .env.testnet
+arguments.js

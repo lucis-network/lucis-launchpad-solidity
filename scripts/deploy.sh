@@ -1,2 +1,2 @@
 yarn compile
-yarn deploy:mainet
+yarn deploy

@@ -14,7 +14,11 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  if (!process.env.RECEIVE_ADDRESS) {
+  if (
+    !process.env.RECEIVE_ADDRESS ||
+    !process.env.BOX_TYPES! ||
+    !process.env.BOX_PRICES!
+  ) {
     console.error("Please setting env file");
     return;
   }
@@ -30,7 +34,8 @@ async function main() {
     const box = await BoxNft.deploy(
       busd.address,
       process.env.RECEIVE_ADDRESS!,
-      "50000000000000000000"
+      process.env.BOX_TYPES!.split(","),
+      process.env.BOX_PRICES!.split(",")
     );
     await box.deployed();
     console.log("Box deployed to:", box.address);
@@ -46,7 +51,8 @@ async function main() {
   const box = await BoxNft.deploy(
     process.env.PAYMENT_TOKEN_ADDRESS!,
     process.env.RECEIVE_ADDRESS!,
-    "PRICE_18_UNIT"
+    process.env.BOX_TYPES!.split(","),
+    process.env.BOX_PRICES!.split(",")
   );
   await box.deployed();
   console.log("Box deployed to:", box.address);
