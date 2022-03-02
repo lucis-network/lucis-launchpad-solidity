@@ -1,6 +1,10 @@
 import BN, { BigNumber } from "bignumber.js";
 
 export class MathHelper {
+  public static toString(num: number) {
+    return num.toLocaleString("fullwide", { useGrouping: false });
+  }
+
   public static getBN(t: string | number | BigNumber) {
     if (typeof t === "object") {
       return new BN(t.toString());
@@ -37,7 +41,7 @@ export class MathHelper {
   ) {
     const bnA = this.getBN(numberA);
     const bnB = this.getBN(numberB);
-    return bnA.multipliedBy(bnB).toString();
+    return bnA.multipliedBy(bnB);
   }
 
   public static div(
@@ -55,7 +59,7 @@ export class MathHelper {
   ) {
     const bnA = this.getBN(numberA);
     const bnB = this.getBN(numberB);
-    return bnA.pow(bnB).toString();
+    return bnA.pow(bnB);
   }
 
   public static plus(
@@ -64,7 +68,7 @@ export class MathHelper {
   ) {
     const bnA = this.getBN(numberA);
     const bnB = this.getBN(numberB);
-    return bnA.plus(bnB).toString();
+    return bnA.plus(bnB);
   }
 
   public static minus(
@@ -73,6 +77,6 @@ export class MathHelper {
   ) {
     const bnA = this.getBN(numberA);
     const bnB = this.getBN(numberB);
-    return bnA.minus(bnB).toString();
+    return bnA.minus(bnB);
   }
 }
