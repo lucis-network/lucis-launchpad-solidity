@@ -23,23 +23,13 @@ async function main() {
     return;
   }
 
-  if (process.env.MODE === "dev") {
+  if (!process.env.PAYMENT_TOKEN_ADDRESS) {
     // Deploy BUSD
     const BUSDToken = await ethers.getContractFactory("BUSDToken");
     const busd = await BUSDToken.deploy();
     await busd.deployed();
-    console.log("busd deployed to:", busd.address);
-
-    const BoxNft = await ethers.getContractFactory("BoxNft");
-    const box = await BoxNft.deploy(
-      busd.address,
-      process.env.RECEIVE_ADDRESS!,
-      process.env.BOX_TYPES!.split(","),
-      process.env.BOX_PRICES!.split(",")
-    );
-    await box.deployed();
-    console.log("Box deployed to:", box.address);
-    return;
+    process.env.PAYMENT_TOKEN_ADDRESS = busd.address;
+    console.log("busd deployed to:", process.env.PAYMENT_TOKEN_ADDRESS);
   }
 
   if (!process.env.PAYMENT_TOKEN_ADDRESS) {
