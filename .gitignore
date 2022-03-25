@@ -12,3 +12,4 @@ artifacts
 .env.testnet
 arguments.js
 .env.dev
+.env.testnet.eth
