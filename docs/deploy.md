@@ -11,3 +11,7 @@
 # Rinked by
 
 - usdt address: 0xb5f173aF6F7D6B5ceaFa0507B8C52B80c448d430
+
+# Polygon mumbai
+
+- pusd address: 0x9edB2C18d2842Ce1790545Bb486Ba62c6cBd2B46
