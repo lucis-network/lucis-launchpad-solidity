@@ -13,3 +13,4 @@ artifacts
 arguments.js
 .env.dev
 .env.trial
+.env.testnet.eth

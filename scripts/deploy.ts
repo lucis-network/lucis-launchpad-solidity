@@ -25,11 +25,13 @@ async function main() {
 
   if (!process.env.PAYMENT_TOKEN_ADDRESS) {
     // Deploy BUSD
-    const BUSDToken = await ethers.getContractFactory("BUSDToken");
-    const busd = await BUSDToken.deploy();
-    await busd.deployed();
-    process.env.PAYMENT_TOKEN_ADDRESS = busd.address;
-    console.log("busd deployed to:", process.env.PAYMENT_TOKEN_ADDRESS);
+    const Token = await ethers.getContractFactory(
+      process.env.TOKEN_FILE ?? "BUSDToken"
+    );
+    const _token = await Token.deploy();
+    await _token.deployed();
+    process.env.PAYMENT_TOKEN_ADDRESS = _token.address;
+    console.log("token deployed to:", process.env.PAYMENT_TOKEN_ADDRESS);
   }
 
   if (!process.env.PAYMENT_TOKEN_ADDRESS) {
