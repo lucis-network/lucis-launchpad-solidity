@@ -10,3 +10,10 @@ artifacts
 .env.local
 .env.mainet
 .env.testnet
+arguments.js
+.env.dev
+.env.trial
+.env.testnet.eth
+contracts/USDTToken.sol
+contracts/PUSDTToken.sol
+.env.mumbai

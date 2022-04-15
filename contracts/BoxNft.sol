@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./IGameNft.sol";
 
 contract BoxNft is
 Context,
@@ -17,6 +17,7 @@ AccessControlEnumerable,
 ERC721Enumerable,
 ERC721Burnable {
     using SafeMath for uint256;
+    using Math for uint256;
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
@@ -29,9 +30,7 @@ ERC721Burnable {
 
     IERC20 private paymentToken;
     address private receiveAddress;
-    uint256 private price;
-    // mapping(uint => uint256) private prices;
-
+    mapping(string => uint256) private prices;
     bool private allowSummonItem = false;
 
     event ItemSummoned(uint256 tokenId);
@@ -39,18 +38,32 @@ ERC721Burnable {
     constructor(
         address _paymentTokenAddress,
         address _receiveAddress,
-        uint256 _price
+        string[] memory boxType, 
+        uint256[] memory _prices
     ) ERC721("Game Box NFT", "GBN") {
 
         paymentToken = IERC20(_paymentTokenAddress);
         receiveAddress = _receiveAddress;
-        price = _price;
-
+        
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
 
         _tokenIdTracker.increment();
-
+        _setPrices(boxType, _prices);
+    }
+    
+    function setPrices(string[] memory boxType, uint256[] memory _prices) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "must have minter role");
+        _setPrices(boxType, _prices);
+    }
+    function _setPrices(string[] memory boxType, uint256[] memory _prices) private {
+        uint256 length = boxType.length.min(_prices.length);
+        for(uint256 i=0;i<length;i++) {
+            prices[boxType[i]] = _prices[i];
+        }
+    }
+    function getPrices(string calldata boxType) external view returns (uint256) {
+        return prices[boxType];
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
@@ -84,11 +97,13 @@ ERC721Burnable {
         }
     }
 
-    function buyBox(address toAddress, uint256 quantity) external {
+    function buyBox(address toAddress, string memory boxType, uint256 quantity) external {
         require(hasRole(MINTER_ROLE, _msgSender()), "must have minter role");
         require(toAddress != address(0), "could not mint to zero address");
         require(quantity > 0, "quantity must be greater than 0");
-
+        uint256 price = prices[boxType];
+        require(price > 0, "price must be greater than 0");
+        
         // check approve
         uint256 payAmount = price * quantity;
 

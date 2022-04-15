@@ -14,27 +14,24 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  if (!process.env.RECEIVE_ADDRESS) {
+  if (
+    !process.env.RECEIVE_ADDRESS ||
+    !process.env.BOX_TYPES! ||
+    !process.env.BOX_PRICES!
+  ) {
     console.error("Please setting env file");
     return;
   }
 
-  if (process.env.MODE === "dev") {
+  if (!process.env.PAYMENT_TOKEN_ADDRESS) {
     // Deploy BUSD
-    const BUSDToken = await ethers.getContractFactory("BUSDToken");
-    const busd = await BUSDToken.deploy();
-    await busd.deployed();
-    console.log("busd deployed to:", busd.address);
-
-    const BoxNft = await ethers.getContractFactory("BoxNft");
-    const box = await BoxNft.deploy(
-      busd.address,
-      process.env.RECEIVE_ADDRESS!,
-      "50000000000000000000"
+    const Token = await ethers.getContractFactory(
+      process.env.TOKEN_FILE ?? "BUSDToken"
     );
-    await box.deployed();
-    console.log("Box deployed to:", box.address);
-    return;
+    const _token = await Token.deploy();
+    await _token.deployed();
+    process.env.PAYMENT_TOKEN_ADDRESS = _token.address;
+    console.log("token deployed to:", process.env.PAYMENT_TOKEN_ADDRESS);
   }
 
   if (!process.env.PAYMENT_TOKEN_ADDRESS) {
@@ -46,7 +43,8 @@ async function main() {
   const box = await BoxNft.deploy(
     process.env.PAYMENT_TOKEN_ADDRESS!,
     process.env.RECEIVE_ADDRESS!,
-    "PRICE_18_UNIT"
+    process.env.BOX_TYPES!.split(","),
+    process.env.BOX_PRICES!.split(",")
   );
   await box.deployed();
   console.log("Box deployed to:", box.address);
