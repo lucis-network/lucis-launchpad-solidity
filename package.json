@@ -4,6 +4,7 @@
     "start:node": "npx hardhat node",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run --network default scripts/deploy.ts",
+    "update": "npx hardhat run --network default scripts/update.ts",
     "start:console": "npx hardhat console --network default",
     "test": "npx hardhat test --network default",
     "verify": "npx hardhat verify --network default --constructor-args arguments.js DEPLOYED_CONTRACT_ADDRESS"
