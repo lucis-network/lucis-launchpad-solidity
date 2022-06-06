@@ -65,6 +65,11 @@ async function main() {
   }
 
   if (!process.env.LBOX_CONTRACT_ADDRESS) {
+    if (!process.env.RECEIVE_ADDRESS) {
+      console.log("RECEIVE_ADDRESS Missing");
+      return;
+    }
+
     if (
       !process.env.BOX_TYPES ||
       !process.env.BOX_PRICES ||
@@ -93,12 +98,12 @@ async function main() {
 
     const boxCt = await LBox.deploy(
       process.env.PAYMENT_TOKEN_ADDRESS!,
-      process.env.FEE_WALLET!
+      process.env.RECEIVE_ADDRESS!
     );
     await boxCt.deployed();
     console.log("LBox deployed to:", boxCt.address);
 
-    if (!!process.env.LUCIS_NFT_CONTRACT_ADDRESS) {
+    if (process.env.LUCIS_NFT_CONTRACT_ADDRESS) {
       const updateNftBoxTx = await boxCt.updateNftContract(
         process.env.LUCIS_NFT_CONTRACT_ADDRESS
       );
