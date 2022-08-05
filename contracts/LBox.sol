@@ -96,7 +96,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
 
         charRates = _charRates;
-        rarityRates = rarityRates;
+        rarityRates = _rarityRates;
         levelRates = _levelRates;
         elementalRates = _elementalRates;
 
@@ -111,6 +111,8 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         string memory boxType,
         uint256 quantity
     ) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
+
         require(toAddress != address(0), "ZERO_ADDRESS");
         require(quantity > 0, "QUANTITY_INVALID");
         uint256 price = prices[boxType];
@@ -136,8 +138,8 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         for (uint256 i = 0; i < quantity; i++) {
             _mint(toAddress, _tokenIdTracker.current());
             _tokenIdTracker.increment();
-            availables[boxType] -= quantity;
         }
+        availables[boxType] -= quantity;
     }
 
     function _random() private returns (uint256) {
