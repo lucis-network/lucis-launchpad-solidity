@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "./ILucisNft.sol";
 
-contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
+contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
     // using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    Counters.Counter private _tokenIdTracker;
+    uint256 public constant BOX_ITEM_ID = 1;
 
     IERC20 private paymentToken;
     address private receiveAddress;
@@ -39,7 +40,6 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
     uint256[] private glassesRates;
 
     event ItemSummoned(
-        uint256 tokenId,
         uint256 itemTokenId,
         uint256 character,
         uint256 rarity,
@@ -54,13 +54,13 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
     modifier onlyAdmin() {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "LUcis NFT: Must have admin role"
+            "Lucis NFT: Must have admin role"
         );
         _;
     }
 
-    constructor(address _paymentTokenAddress, address _receiveAddress)
-        ERC721("LUCIS Box NFT", "LBN")
+    constructor(address _paymentTokenAddress, address _receiveAddress, string memory uri)
+        ERC1155(uri)
     {
         paymentToken = IERC20(_paymentTokenAddress);
         receiveAddress = _receiveAddress;
@@ -68,7 +68,6 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
 
-        _tokenIdTracker.increment();
     }
 
     function allocBox(
@@ -101,7 +100,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         uint256[] memory _glassesRates
     ) external onlyAdmin {
         charRates = _charRates;
-        rarityRates = rarityRates;
+        rarityRates = _rarityRates;
         levelRates = _levelRates;
         elementalRates = _elementalRates;
 
@@ -109,10 +108,6 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         hatRates = _hatRates;
         weaponRates = _weaponRates;
         glassesRates = _glassesRates;
-        backgroundRates = _backgroundRates;
-        levelRates = _levelRates;
-        factorRates = _factorRates;
-        hatRates = _haloRates;
     }
 
     function buyBox(
@@ -142,11 +137,8 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
 
         paymentToken.transferFrom(toAddress, receiveAddress, payAmount);
 
-        for (uint256 i = 0; i < quantity; i++) {
-            _mint(toAddress, _tokenIdTracker.current());
-            _tokenIdTracker.increment();
-            availables[boxType] -= quantity;
-        }
+        _mint(toAddress, BOX_ITEM_ID, quantity, "");
+        availables[boxType] -= quantity;
     }
 
     function _random() private returns (uint256) {
@@ -180,10 +172,10 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         return 0;
     }
 
-    function summonItem(uint256 tokenId) external {
+    function summonItem() external {
         require(allowSummonItem, "NOT_ALLOWED");
         // check owner of tokenId
-        require(ERC721.ownerOf(tokenId) == msg.sender, "NOT_PERMISSION");
+        require(ERC1155.balanceOf(msg.sender, BOX_ITEM_ID) > 0, "NOT_PERMISSION");
 
         uint256 _character = _randomFrom(charRates);
         uint256 _rarity = _randomFrom(rarityRates);
@@ -194,10 +186,6 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         uint256 _hat = _randomFrom(hatRates);
         uint256 _weapon = _randomFrom(weaponRates);
         uint256 _glasses = _randomFrom(glassesRates);
-        uint256 _background = _randomFrom(backgroundRates);
-        uint256 _level = _randomFrom(levelRates);
-        uint256 _factor = _randomFrom(factorRates);
-        uint256 _halo = _randomFrom(haloRates);
 
         uint256 _itemTokenId = lucisNft.mintToken(
             msg.sender,
@@ -211,9 +199,8 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
             _glasses
         );
 
-        ERC721Burnable.burn(tokenId);
+        ERC1155Burnable.burn(msg.sender, BOX_ITEM_ID, 1);
         emit ItemSummoned(
-            tokenId,
             _itemTokenId,
             _character,
             _rarity,
@@ -238,12 +225,9 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         return prices[boxType];
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
 
-    function setBaseURI(string memory baseTokenURI) external onlyAdmin {
-        _baseTokenURI = baseTokenURI;
+    function setURI(string memory newUri) external onlyAdmin {
+        ERC1155._setURI(newUri);
     }
 
     function setAllowSummonItem(bool _allowSummonItem) external onlyAdmin {
@@ -272,11 +256,14 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
     }
 
     function _beforeTokenTransfer(
+        address operator,
         address from,
         address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Pausable) {
-        super._beforeTokenTransfer(from, to, tokenId);
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override(ERC1155, ERC1155Pausable) {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
     /**
@@ -286,7 +273,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         public
         view
         virtual
-        override(AccessControl, ERC721)
+        override(AccessControl, ERC1155)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

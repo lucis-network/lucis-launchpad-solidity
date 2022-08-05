@@ -17,3 +17,5 @@ arguments.js
 contracts/USDTToken.sol
 contracts/PUSDTToken.sol
 .env.mumbai
+
+.idea

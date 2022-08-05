@@ -116,15 +116,15 @@ contract LucisNFT is
     ) external returns (uint256) {
         require(hasRole(MINTER_ROLE, _msgSender()), "NEED_MINTER_ROLE");
         require(toAddress != address(0), "ZERO_ADDRESS");
-        require(character >= 0 && character < 12, "CHARACTER_INVALID");
-        require(rarity >= 0 && rarity < 6, "BACKGROUND_INVALID");
+        require(rarity >= 0 && rarity < 6, "RARITY_INVALID");
         require(level >= 0 && level < 6, "LEVEL_INVALID");
         require(elemental >= 0 && elemental < 6, "FACTOR_INVALID");
 
+        require(character >= 0 && character < 12, "CHARACTER_INVALID");
         require(costume >= 0 && costume < 12, "COSTUME_INVALID");
         require(hat >= 0 && hat < 12, "HAT_INVALID");
         require(weapon >= 0 && weapon < 12, "WEAPON_INVALID");
-        require(glasses >= 0 && glasses < 6, "GLASSES_INVALID");
+        require(glasses >= 0 && glasses < 12, "GLASSES_INVALID");
 
         uint256 _tokenId = _tokenIdTracker.current();
         _mint(toAddress, _tokenId);

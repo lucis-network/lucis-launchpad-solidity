@@ -17,7 +17,7 @@ let decimals: number;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 let firstType = "type";
 let firstPrice = "";
-let buy_amount = 100;
+const buy_amount = 100;
 const boxBuyed: number[] = [];
 const URI_CONTENT = "https://game/";
 
