@@ -5,27 +5,25 @@ pragma solidity ^0.8.1;
 interface ILucisNft {
     struct Item {
         uint256 character;
+        uint256 rarity;
+        uint256 level;
+        uint256 elemental;
         uint256 costume;
         uint256 hat;
         uint256 weapon;
         uint256 glasses;
-        uint256 background;
-        uint256 level;
-        uint256 factor;
-        uint256 halo;
     }
 
     event ItemMinted(
         uint256 tokenId,
         uint256 character,
+        uint256 rarity,
+        uint256 level,
+        uint256 elemental,
         uint256 costume,
         uint256 hat,
         uint256 weapon,
-        uint256 glasses,
-        uint256 background,
-        uint256 level,
-        uint256 factor,
-        uint256 halo
+        uint256 glasses
     );
 
     event Transfer(
@@ -88,13 +86,12 @@ interface ILucisNft {
     function mintToken(
         address toAddress,
         uint256 character,
+        uint256 rarity,
+        uint256 level,
+        uint256 elemental,
         uint256 costume,
         uint256 hat,
         uint256 weapon,
-        uint256 glasses,
-        uint256 background,
-        uint256 level,
-        uint256 factor,
-        uint256 halo
+        uint256 glasses
     ) external returns (uint256);
 }

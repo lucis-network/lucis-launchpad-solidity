@@ -81,14 +81,13 @@ async function main() {
 
     if (
       !process.env.BOX_CHAR_RATES ||
+      !process.env.BOX_RARITY_RATES ||
+      !process.env.BOX_LEVEL_RATES ||
+      !process.env.BOX_ELEMENTAL_RATES ||
       !process.env.BOX_COSTUME_RATES ||
       !process.env.BOX_HAT_RATES ||
       !process.env.BOX_WEAPON_RATES ||
-      !process.env.BOX_GLASSES_RATES ||
-      !process.env.BOX_BACKGROUND_RATES ||
-      !process.env.BOX_LEVEL_RATES ||
-      !process.env.BOX_FACTOR_RATES ||
-      !process.env.BOX_HALO_RATES
+      !process.env.BOX_GLASSES_RATES
     ) {
       console.log("BOX ATT not set in env");
       return;
@@ -119,14 +118,13 @@ async function main() {
 
     const updateBoxTx = await boxCt.updateBox(
       process.env.BOX_CHAR_RATES.split(","),
+      process.env.BOX_RARITY_RATES.split(","),
+      process.env.BOX_LEVEL_RATES.split(","),
+      process.env.BOX_ELEMENTAL_RATES.split(","),
       process.env.BOX_COSTUME_RATES.split(","),
       process.env.BOX_HAT_RATES.split(","),
       process.env.BOX_WEAPON_RATES.split(","),
-      process.env.BOX_GLASSES_RATES.split(","),
-      process.env.BOX_BACKGROUND_RATES.split(","),
-      process.env.BOX_LEVEL_RATES.split(","),
-      process.env.BOX_FACTOR_RATES.split(","),
-      process.env.BOX_HALO_RATES.split(",")
+      process.env.BOX_GLASSES_RATES.split(",")
     );
     console.log("updateBoxTx: ", updateBoxTx.hash);
   }
