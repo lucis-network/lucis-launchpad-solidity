@@ -52,6 +52,14 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         uint256 itemTokenId
     );
 
+    modifier onlyAdmin() {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "LUcis NFT: Must have admin role"
+        );
+        _;
+    }
+
     constructor(address _paymentTokenAddress, address _receiveAddress)
         ERC721("LUCIS Box NFT", "LBN")
     {
@@ -68,8 +76,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         string[] memory boxType,
         uint256[] memory _prices,
         uint256[] memory _qtys
-    ) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
+    ) external onlyAdmin {
         _allocBox(boxType, _prices, _qtys);
     }
 
@@ -94,9 +101,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         uint256[] memory _levelRates,
         uint256[] memory _factorRates,
         uint256[] memory _haloRates
-    ) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
-
+    ) external onlyAdmin {
         charRates = _charRates;
         costumeRates = _costumeRates;
         hatRates = _hatRates;
@@ -217,8 +222,7 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         );
     }
 
-    function setInitNone(uint256 value) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
+    function setInitNone(uint256 value) external onlyAdmin {
         nonce = value;
     }
 
@@ -234,43 +238,26 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         return _baseTokenURI;
     }
 
-    function setBaseURI(string memory baseTokenURI) external {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setBaseURI(string memory baseTokenURI) external onlyAdmin {
         _baseTokenURI = baseTokenURI;
     }
 
-    function setAllowSummonItem(bool _allowSummonItem) external {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setAllowSummonItem(bool _allowSummonItem) external onlyAdmin {
         allowSummonItem = _allowSummonItem;
     }
 
-    function updateNftContract(address _nftAddress) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_PERMISSION");
+    function updateNftContract(address _nftAddress) external onlyAdmin {
         require(_nftAddress != address(0), "ADDRESS_INVALID");
         lucisNft = ILucisNft(_nftAddress);
     }
 
-    function setReceivedAddress(address _receivedAddress) external {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setReceivedAddress(address _receivedAddress) external onlyAdmin {
         require(_receivedAddress != address(0), "ADDRESS_INVALID");
 
         receiveAddress = _receivedAddress;
     }
 
-    function setupMinterRole(address account, bool _enable) external {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setupMinterRole(address account, bool _enable) external onlyAdmin {
         require(account != address(0), "ADDRESS_INVALID");
 
         if (_enable) {

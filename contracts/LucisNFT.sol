@@ -24,10 +24,14 @@ contract LucisNFT is
         uint256 hat;
         uint256 weapon;
         uint256 glasses;
+
         uint256 background;
         uint256 level;
+
         uint256 factor;
         uint256 halo;
+
+        
     }
 
     using Counters for Counters.Counter;
@@ -49,6 +53,14 @@ contract LucisNFT is
         uint256 halo
     );
 
+    modifier onlyAdmin() {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "LUcis NFT: Must have admin role"
+        );
+        _;
+    }
+
     constructor() ERC721("Lucis NFT", "LCN") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
@@ -61,20 +73,12 @@ contract LucisNFT is
         return _baseTokenURI;
     }
 
-    function setBaseURI(string memory baseTokenURI) external {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setBaseURI(string memory baseTokenURI) external onlyAdmin {
         _baseTokenURI = baseTokenURI;
     }
 
-    function setupMinterRole(address account, bool _enable) external {
-        require(account != address(0), "account must be not equal address 0x");
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "must have admin role"
-        );
+    function setupMinterRole(address account, bool _enable) external onlyAdmin {
+        require(account != address(0), "LUcis NFT: Account must be not equal address 0x");
         if (_enable) {
             _setupRole(MINTER_ROLE, account);
         } else {
@@ -124,11 +128,11 @@ contract LucisNFT is
         require(costume >= 0 && costume < 12, "COSTUME_INVALID");
         require(hat >= 0 && hat < 12, "HAT_INVALID");
         require(weapon >= 0 && weapon < 12, "WEAPON_INVALID");
-        require(glasses >= 0 && glasses < 6, "GLASSES_INVALID");
+        require(glasses >= 0 && glasses < 12, "GLASSES_INVALID");
         require(background >= 0 && background < 7, "BACKGROUND_INVALID");
         require(level >= 0 && level < 6, "LEVEL_INVALID");
         require(factor >= 0 && factor < 6, "FACTOR_INVALID");
-        require(halo >= 0 && halo < 4, "HALO_INVALID");
+        require(halo >= 0 && halo < 6, "HALO_INVALID");
 
         uint256 _tokenId = _tokenIdTracker.current();
         _mint(toAddress, _tokenId);
