@@ -29,27 +29,26 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
     string private _baseTokenURI = "";
 
     uint256[] private charRates;
+    uint256[] private rarityRates;
+    uint256[] private levelRates;
+    uint256[] private elementalRates;
+
     uint256[] private costumeRates;
     uint256[] private hatRates;
     uint256[] private weaponRates;
     uint256[] private glassesRates;
-    uint256[] private backgroundRates;
-    uint256[] private levelRates;
-    uint256[] private factorRates;
-    uint256[] private haloRates;
 
     event ItemSummoned(
         uint256 tokenId,
+        uint256 itemTokenId,
         uint256 character,
+        uint256 rarity,
+        uint256 level,
+        uint256 elemental,
         uint256 costume,
         uint256 hat,
         uint256 weapon,
-        uint256 glasses,
-        uint256 background,
-        uint256 level,
-        uint256 factor,
-        uint256 halo,
-        uint256 itemTokenId
+        uint256 glasses
     );
 
     modifier onlyAdmin() {
@@ -93,16 +92,19 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
 
     function updateBox(
         uint256[] memory _charRates,
+        uint256[] memory _rarityRates,
+        uint256[] memory _levelRates,
+        uint256[] memory _elementalRates,
         uint256[] memory _costumeRates,
         uint256[] memory _hatRates,
         uint256[] memory _weaponRates,
-        uint256[] memory _glassesRates,
-        uint256[] memory _backgroundRates,
-        uint256[] memory _levelRates,
-        uint256[] memory _factorRates,
-        uint256[] memory _haloRates
+        uint256[] memory _glassesRates
     ) external onlyAdmin {
         charRates = _charRates;
+        rarityRates = rarityRates;
+        levelRates = _levelRates;
+        elementalRates = _elementalRates;
+
         costumeRates = _costumeRates;
         hatRates = _hatRates;
         weaponRates = _weaponRates;
@@ -184,6 +186,10 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         require(ERC721.ownerOf(tokenId) == msg.sender, "NOT_PERMISSION");
 
         uint256 _character = _randomFrom(charRates);
+        uint256 _rarity = _randomFrom(rarityRates);
+        uint256 _level = _randomFrom(levelRates);
+        uint256 _elemental = _randomFrom(elementalRates);
+
         uint256 _costume = _randomFrom(costumeRates);
         uint256 _hat = _randomFrom(hatRates);
         uint256 _weapon = _randomFrom(weaponRates);
@@ -196,29 +202,27 @@ contract LBox is Context, AccessControl, ERC721Burnable, ERC721Pausable {
         uint256 _itemTokenId = lucisNft.mintToken(
             msg.sender,
             _character,
+            _rarity,
+            _level,
+            _elemental,
             _costume,
             _hat,
             _weapon,
-            _glasses,
-            _background,
-            _level,
-            _factor,
-            _halo
+            _glasses
         );
 
         ERC721Burnable.burn(tokenId);
         emit ItemSummoned(
             tokenId,
+            _itemTokenId,
             _character,
+            _rarity,
+            _level,
+            _elemental,
             _costume,
             _hat,
             _weapon,
-            _glasses,
-            _background,
-            _level,
-            _factor,
-            _halo,
-            _itemTokenId
+            _glasses
         );
     }
 

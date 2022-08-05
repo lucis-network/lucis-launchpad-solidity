@@ -18,39 +18,32 @@ contract LucisNFT is
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    struct Item {
-        uint256 character;
-        uint256 costume;
-        uint256 hat;
-        uint256 weapon;
-        uint256 glasses;
-
-        uint256 background;
-        uint256 level;
-
-        uint256 factor;
-        uint256 halo;
-
-        
-    }
-
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdTracker;
     // Mapping from token ID to token data
     mapping(uint256 => Item) private _tokenDetail;
     string private _baseTokenURI = "";
+    struct Item {
+        uint256 character;
+        uint256 rarity;
+        uint256 level;
+        uint256 elemental;
+        uint256 costume;
+        uint256 hat;
+        uint256 weapon;
+        uint256 glasses;
+    }
 
     event ItemMinted(
         uint256 tokenId,
         uint256 character,
+        uint256 rarity,
+        uint256 level,
+        uint256 elemental,
         uint256 costume,
         uint256 hat,
         uint256 weapon,
-        uint256 glasses,
-        uint256 background,
-        uint256 level,
-        uint256 factor,
-        uint256 halo
+        uint256 glasses
     );
 
     modifier onlyAdmin() {
@@ -113,53 +106,50 @@ contract LucisNFT is
     function mintToken(
         address toAddress,
         uint256 character,
+        uint256 rarity,
+        uint256 level,
+        uint256 elemental,
         uint256 costume,
         uint256 hat,
         uint256 weapon,
-        uint256 glasses,
-        uint256 background,
-        uint256 level,
-        uint256 factor,
-        uint256 halo
+        uint256 glasses
     ) external returns (uint256) {
         require(hasRole(MINTER_ROLE, _msgSender()), "NEED_MINTER_ROLE");
         require(toAddress != address(0), "ZERO_ADDRESS");
         require(character >= 0 && character < 12, "CHARACTER_INVALID");
+        require(rarity >= 0 && rarity < 6, "BACKGROUND_INVALID");
+        require(level >= 0 && level < 6, "LEVEL_INVALID");
+        require(elemental >= 0 && elemental < 6, "FACTOR_INVALID");
+
         require(costume >= 0 && costume < 12, "COSTUME_INVALID");
         require(hat >= 0 && hat < 12, "HAT_INVALID");
         require(weapon >= 0 && weapon < 12, "WEAPON_INVALID");
-        require(glasses >= 0 && glasses < 12, "GLASSES_INVALID");
-        require(background >= 0 && background < 7, "BACKGROUND_INVALID");
-        require(level >= 0 && level < 6, "LEVEL_INVALID");
-        require(factor >= 0 && factor < 6, "FACTOR_INVALID");
-        require(halo >= 0 && halo < 6, "HALO_INVALID");
+        require(glasses >= 0 && glasses < 6, "GLASSES_INVALID");
 
         uint256 _tokenId = _tokenIdTracker.current();
         _mint(toAddress, _tokenId);
         _tokenIdTracker.increment();
         _tokenDetail[_tokenId] = Item(
             character,
+            rarity,
+            level,
+            elemental,
             costume,
             hat,
             weapon,
-            glasses,
-            background,
-            level,
-            factor,
-            halo
+            glasses
         );
 
         emit ItemMinted(
             _tokenId,
             character,
+            rarity,
+            level,
+            elemental,
             costume,
             hat,
             weapon,
-            glasses,
-            background,
-            level,
-            factor,
-            halo
+            glasses
         );
         return _tokenId;
     }
