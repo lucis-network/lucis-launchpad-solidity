@@ -62,71 +62,70 @@ async function main() {
     await lucisNftCt.deployed();
     console.log("LucisNft deployed to:", lucisNftCt.address);
     process.env.LUCIS_NFT_CONTRACT_ADDRESS = lucisNftCt.address;
-  }
 
-  if (!process.env.LBOX_CONTRACT_ADDRESS) {
-    if (!process.env.RECEIVE_ADDRESS) {
-      console.log("RECEIVE_ADDRESS Missing");
-      return;
-    }
 
-    if (
-      !process.env.BOX_TYPES ||
-      !process.env.BOX_PRICES ||
-      !process.env.BOX_QTYS
-    ) {
-      console.log("BOX_TYPES | BOX_PRICES | BOX_QTYS");
-      return;
-    }
+    if (!process.env.LBOX_CONTRACT_ADDRESS) {
+      if (!process.env.RECEIVE_ADDRESS) {
+        console.log("RECEIVE_ADDRESS Missing");
+        return;
+      }
 
-    if (
-      !process.env.BOX_CHAR_RATES ||
-      !process.env.BOX_RARITY_RATES ||
-      !process.env.BOX_LEVEL_RATES ||
-      !process.env.BOX_ELEMENTAL_RATES ||
-      !process.env.BOX_COSTUME_RATES ||
-      !process.env.BOX_HAT_RATES ||
-      !process.env.BOX_WEAPON_RATES ||
-      !process.env.BOX_GLASSES_RATES
-    ) {
-      console.log("BOX ATT not set in env");
-      return;
-    }
+      if (
+        !process.env.BOX_TYPES ||
+        !process.env.BOX_PRICES ||
+        !process.env.BOX_QTYS
+      ) {
+        console.log("BOX_TYPES | BOX_PRICES | BOX_QTYS");
+        return;
+      }
 
-    const LBox = await ethers.getContractFactory("LBox");
+      if (
+        !process.env.BOX_CHAR_RATES ||
+        !process.env.BOX_RARITY_RATES ||
+        !process.env.BOX_LEVEL_RATES ||
+        !process.env.BOX_ELEMENTAL_RATES ||
+        !process.env.BOX_COSTUME_RATES ||
+        !process.env.BOX_HAT_RATES ||
+        !process.env.BOX_WEAPON_RATES ||
+        !process.env.BOX_GLASSES_RATES
+      ) {
+        console.log("BOX ATT not set in env");
+        return;
+      }
 
-    const boxCt = await LBox.deploy(
-      process.env.PAYMENT_TOKEN_ADDRESS!,
-      process.env.RECEIVE_ADDRESS!
-    );
-    await boxCt.deployed();
-    console.log("LBox deployed to:", boxCt.address);
+      const LBox = await ethers.getContractFactory("LBox");
 
-    if (process.env.LUCIS_NFT_CONTRACT_ADDRESS) {
-      const updateNftBoxTx = await boxCt.updateNftContract(
-        process.env.LUCIS_NFT_CONTRACT_ADDRESS
+      const boxCt = await LBox.deploy(
+        process.env.PAYMENT_TOKEN_ADDRESS!,
+        process.env.RECEIVE_ADDRESS!,
+        process.env.BASE_URI!
       );
-      console.log("updateNftBoxTx: ", updateNftBoxTx.hash);
+      await boxCt.deployed();
+      console.log("LBox deployed to:", boxCt.address);
+
+      if (process.env.LUCIS_NFT_CONTRACT_ADDRESS) {
+        const updateNftBoxTx = await boxCt.updateNftContract(
+          process.env.LUCIS_NFT_CONTRACT_ADDRESS
+        );
+        console.log("updateNftBoxTx: ", updateNftBoxTx.hash);
+        const minterRoleSetup = await lucisNftCt.setupMinterRole(boxCt.address, true);
+
+        console.log("setup minter role: ", minterRoleSetup.hash);
+
+      }
+
+      const updateBoxTx = await boxCt.updateBox(
+        process.env.BOX_CHAR_RATES.split(","),
+        process.env.BOX_RARITY_RATES.split(","),
+        process.env.BOX_LEVEL_RATES.split(","),
+        process.env.BOX_ELEMENTAL_RATES.split(","),
+        process.env.BOX_COSTUME_RATES.split(","),
+        process.env.BOX_HAT_RATES.split(","),
+        process.env.BOX_WEAPON_RATES.split(","),
+        process.env.BOX_GLASSES_RATES.split(",")
+      );
+      console.log("updateBoxTx: ", updateBoxTx.hash);
     }
-
-    const allocBoxTx = await boxCt.allocBox(
-      process.env.BOX_TYPES.split(","),
-      process.env.BOX_PRICES.split(","),
-      process.env.BOX_QTYS.split(",")
-    );
-    console.log("allocBoxTx: ", allocBoxTx.hash);
-
-    const updateBoxTx = await boxCt.updateBox(
-      process.env.BOX_CHAR_RATES.split(","),
-      process.env.BOX_RARITY_RATES.split(","),
-      process.env.BOX_LEVEL_RATES.split(","),
-      process.env.BOX_ELEMENTAL_RATES.split(","),
-      process.env.BOX_COSTUME_RATES.split(","),
-      process.env.BOX_HAT_RATES.split(","),
-      process.env.BOX_WEAPON_RATES.split(","),
-      process.env.BOX_GLASSES_RATES.split(",")
-    );
-    console.log("updateBoxTx: ", updateBoxTx.hash);
   }
 }
 

@@ -16,18 +16,14 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
     using Counters for Counters.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    uint256 public constant BOX_ITEM_ID = 1;
+    uint256 public constant LUCIS_BOX_ITEM = 1;
 
     IERC20 private paymentToken;
     address private receiveAddress;
     ILucisNft private lucisNft;
 
-    mapping(string => uint256) private prices;
-    mapping(string => uint256) private availables;
-
     bool private allowSummonItem = false;
     uint256 private nonce = 0;
-    string private _baseTokenURI = "";
 
     uint256[] private charRates;
     uint256[] private rarityRates;
@@ -54,7 +50,7 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
     modifier onlyAdmin() {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "Lucis NFT: Must have admin role"
+            "LBox: Must have admin role"
         );
         _;
     }
@@ -70,24 +66,6 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
 
     }
 
-    function allocBox(
-        string[] memory boxType,
-        uint256[] memory _prices,
-        uint256[] memory _qtys
-    ) external onlyAdmin {
-        _allocBox(boxType, _prices, _qtys);
-    }
-
-    function _allocBox(
-        string[] memory boxType,
-        uint256[] memory _prices,
-        uint256[] memory _qtys
-    ) private {
-        for (uint256 i = 0; i < boxType.length; i++) {
-            prices[boxType[i]] = _prices[i];
-            availables[boxType[i]] = _qtys[i];
-        }
-    }
 
     function updateBox(
         uint256[] memory _charRates,
@@ -112,16 +90,12 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
 
     function buyBox(
         address toAddress,
-        string memory boxType,
+        uint256 price,
         uint256 quantity
-    ) external {
+    ) external onlyAdmin {
         require(toAddress != address(0), "ZERO_ADDRESS");
         require(quantity > 0, "QUANTITY_INVALID");
-        uint256 price = prices[boxType];
         require(price > 0, "price not set");
-
-        uint256 _available = availables[boxType];
-        require((_available - quantity) > 0, "QUANTITY_THRESHOLD");
 
         // check approve
         uint256 payAmount = price * quantity;
@@ -137,8 +111,7 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
 
         paymentToken.transferFrom(toAddress, receiveAddress, payAmount);
 
-        _mint(toAddress, BOX_ITEM_ID, quantity, "");
-        availables[boxType] -= quantity;
+        _mint(toAddress, LUCIS_BOX_ITEM, quantity, "");
     }
 
     function _random() private returns (uint256) {
@@ -172,10 +145,10 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
         return 0;
     }
 
-    function summonItem() external {
+    function summonItem() external returns (uint256){
         require(allowSummonItem, "NOT_ALLOWED");
         // check owner of tokenId
-        require(ERC1155.balanceOf(msg.sender, BOX_ITEM_ID) > 0, "NOT_PERMISSION");
+        require(ERC1155.balanceOf(msg.sender, LUCIS_BOX_ITEM) > 0, "LBox: box is zero");
 
         uint256 _character = _randomFrom(charRates);
         uint256 _rarity = _randomFrom(rarityRates);
@@ -199,7 +172,7 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
             _glasses
         );
 
-        ERC1155Burnable.burn(msg.sender, BOX_ITEM_ID, 1);
+        ERC1155Burnable.burn(msg.sender, LUCIS_BOX_ITEM, 1);
         emit ItemSummoned(
             _itemTokenId,
             _character,
@@ -211,18 +184,12 @@ contract LBox is Context, AccessControl, ERC1155Burnable, ERC1155Pausable {
             _weapon,
             _glasses
         );
+
+        return _itemTokenId;
     }
 
     function setInitNone(uint256 value) external onlyAdmin {
         nonce = value;
-    }
-
-    function getPrices(string calldata boxType)
-        external
-        view
-        returns (uint256)
-    {
-        return prices[boxType];
     }
 
 
